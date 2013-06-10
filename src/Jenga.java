@@ -85,7 +85,7 @@ public class Jenga extends SimpleApplication {
 	}
 
 	private void buildTower() {
-		//20 Reihen x 3 Blöcke
+		//20 Reihen x 3 Bl≈°cke
 		for(int i = 0; i<=20; i++) {
 			if(i%2==0) {
 				//gerade
