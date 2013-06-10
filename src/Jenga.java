@@ -11,6 +11,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
@@ -32,11 +33,14 @@ public class Jenga extends SimpleApplication {
   public static final float BLOCK_HEIGHT = 0.1f; 
 	public static final float BLOCK_WIDTH = 0.25f;
 	public static final float BLOCK_LENGTH = 0.75f;
+	public static final float POINTER_TRANSLATION = 4.0f;
 
 	private float mHeight = 0.0f;
 	private BulletAppState physicsSpace;
 	private PhysicsSpace space;
 	private Geometry floorGeometry;
+	private Pointer pointer;
+	
 	private boolean pause = true;	
 	
 	private void increaseHeight() {
@@ -46,7 +50,7 @@ public class Jenga extends SimpleApplication {
 	private Geometry createBlock(Vector3f location, int angle) {
 		Material boxMaterial = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		Box box = new Box(BLOCK_WIDTH, BLOCK_HEIGHT, BLOCK_LENGTH);
-		Geometry boxGeometry = new Geometry("Box", box);
+		Geometry boxGeometry = new Geometry("Block", box);
 		boxGeometry.setMaterial(boxMaterial);
 
 		RigidBodyControl bulletControl = new RigidBodyControl(0f);
@@ -136,8 +140,7 @@ public class Jenga extends SimpleApplication {
 		addControls(this, rootNode, space);
 		buildTower();
 		
-		
-		Pointer pointer = new Pointer(getAssetManager(), getPhysicsSpace());
+		pointer = new Pointer(getAssetManager(), getPhysicsSpace());
 		pointer.setLocalTranslation(2f, 2f, 2f);
 		
 		rootNode.attachChild(pointer);
@@ -145,6 +148,51 @@ public class Jenga extends SimpleApplication {
 	}
 
 	public void addControls(final Application app, final Node rootNode, final PhysicsSpace space) {
+		
+		AnalogListener analogListener = new AnalogListener() {
+			@Override
+		    public void onAnalog(String name, float value, float tpf) {	
+		    	// control pointer
+				if (name.equals("pointerLeft")) {
+					Vector3f pos = pointer.control.getPhysicsLocation();
+					//pointer.setLocalTranslation(pos.x - POINTER_TRANSLATION * tpf, pos.y, pos.z);
+					//pointer.control.setPhysicsLocation(new Vector3f(pos.x - POINTER_TRANSLATION * tpf, pos.y, pos.z));
+					
+					Vector3f wtf = new Vector3f(pos.x - POINTER_TRANSLATION * tpf, pos.y, pos.z);
+					Vector3f newPos = pos.subtract(wtf);
+					newPos = newPos.normalize();
+					
+					pointer.control.applyForce(newPos.mult(10f), pos);
+				}
+				if (name.equals("pointerRight")) {
+					Vector3f pos = pointer.control.getPhysicsLocation();			
+					pointer.setLocalTranslation(pos.x + POINTER_TRANSLATION * tpf, pos.y, pos.z);
+					pointer.control.setPhysicsLocation(new Vector3f(pos.x + POINTER_TRANSLATION * tpf, pos.y, pos.z));
+				}
+				if (name.equals("pointerBack")) {
+					Vector3f pos = pointer.control.getPhysicsLocation();
+					pointer.setLocalTranslation(pos.x, pos.y, pos.z + POINTER_TRANSLATION * tpf);
+					pointer.control.setPhysicsLocation(new Vector3f(pos.x, pos.y, pos.z + POINTER_TRANSLATION * tpf));
+				}
+				if (name.equals("pointerForward")) {
+					Vector3f pos = pointer.control.getPhysicsLocation();
+					
+					pointer.setLocalTranslation(pos.x, pos.y, pos.z - POINTER_TRANSLATION * tpf);
+					pointer.control.setPhysicsLocation(new Vector3f(pos.x, pos.y, pos.z - POINTER_TRANSLATION * tpf));
+				}
+				if (name.equals("pointerUp")) {
+					Vector3f pos = pointer.control.getPhysicsLocation();
+					pointer.setLocalTranslation(pos.x, pos.y + (POINTER_TRANSLATION - 2.0f) * tpf, pos.z);
+					pointer.control.setPhysicsLocation(new Vector3f(pos.x, pos.y + (POINTER_TRANSLATION - 2.0f) * tpf, pos.z));
+				}
+				if (name.equals("pointerDown")) {
+					Vector3f pos = pointer.control.getPhysicsLocation();
+					pointer.setLocalTranslation(pos.x, pos.y - (POINTER_TRANSLATION - 2.0f) * tpf, pos.z);
+					pointer.control.setPhysicsLocation(new Vector3f(pos.x, pos.y - (POINTER_TRANSLATION - 2.0f) * tpf, pos.z));
+				}
+		    }
+		};
+		
 		ActionListener actionListener = new ActionListener() {
 			@Override
 			public void onAction(String name, boolean isPressed, float tpf) {
@@ -152,7 +200,12 @@ public class Jenga extends SimpleApplication {
 					Collection<PhysicsRigidBody> bodies = getPhysicsSpace().getRigidBodyList();
 					for (PhysicsRigidBody physicsRigidBody : bodies) {
 						if(!pause) {
+							/*
 							physicsRigidBody.setFriction(1f);
+							getPhysicsSpace().setAccuracy(1f/200f);
+							*/
+							physicsRigidBody.setFriction(1.0f);
+							physicsRigidBody.setMass(200f);
 							getPhysicsSpace().setAccuracy(1f/200f);
 						} else {
 							physicsRigidBody.setFriction(0.4f);
@@ -177,6 +230,8 @@ public class Jenga extends SimpleApplication {
                     rootNode.attachChild(sphereGeometry);
                     getPhysicsSpace().add(bulletControl);
 				}
+				
+				
 			}
 		};
 
@@ -185,6 +240,20 @@ public class Jenga extends SimpleApplication {
 		
 		app.getInputManager().addMapping("shootSphere", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         app.getInputManager().addListener(actionListener, "shootSphere");
+        
+        app.getInputManager().addMapping("pointerLeft", new KeyTrigger(KeyInput.KEY_J));
+        app.getInputManager().addListener(analogListener, "pointerLeft");
+        app.getInputManager().addMapping("pointerRight", new KeyTrigger(KeyInput.KEY_L));
+        app.getInputManager().addListener(analogListener, "pointerRight");
+        app.getInputManager().addMapping("pointerBack", new KeyTrigger(KeyInput.KEY_K));
+        app.getInputManager().addListener(analogListener, "pointerBack");
+        app.getInputManager().addMapping("pointerForward", new KeyTrigger(KeyInput.KEY_I));
+        app.getInputManager().addListener(analogListener, "pointerForward");
+        app.getInputManager().addMapping("pointerUp", new KeyTrigger(KeyInput.KEY_Y));
+        app.getInputManager().addListener(analogListener, "pointerUp");
+        app.getInputManager().addMapping("pointerDown", new KeyTrigger(KeyInput.KEY_H));
+        app.getInputManager().addListener(analogListener, "pointerDown");
+        
 	}
 
 
