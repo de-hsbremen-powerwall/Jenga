@@ -26,6 +26,8 @@ import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.scene.shape.Sphere.TextureMode;
 import com.jme3.system.AppSettings;
+import com.jme3.texture.Texture;
+import com.jme3.util.SkyFactory;
 
 
 public class Jenga extends SimpleApplication {
@@ -47,6 +49,8 @@ public class Jenga extends SimpleApplication {
 		mHeight += BLOCK_HEIGHT + 0.002f;
 	}
 
+	
+	
 	private Geometry createBlock(Vector3f location, int angle) {
 		Material boxMaterial = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		Box box = new Box(BLOCK_WIDTH, BLOCK_HEIGHT, BLOCK_LENGTH);
@@ -100,6 +104,9 @@ public class Jenga extends SimpleApplication {
 			}
 			increaseHeight();
 		}
+		
+	    
+		
 	}
 
 	public float getHeight() {
@@ -128,14 +135,24 @@ public class Jenga extends SimpleApplication {
 		Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		material.setColor("Color", ColorRGBA.DarkGray);
 
-		Box floorBox = new Box(140, 0.1f, 140);
+		Box floorBox = new Box(60, 0.1f, 60);
 		floorGeometry = new Geometry("Boden", floorBox);
 		floorGeometry.setMaterial(material);
 		floorGeometry.setLocalTranslation(0, -0.1f, 0);
 		floorGeometry.addControl(new RigidBodyControl(0));
+		
+		Material floorMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		
+		Texture floorTex = assetManager.loadTexture("assets/Textures/boden3.png");
+		
+		floorMat.setTexture("ColorMap", floorTex);
+		
+		floorGeometry.setMaterial(floorMat);
 
 		rootNode.attachChild(floorGeometry);
 		physicsSpace.getPhysicsSpace().add(floorGeometry);
+		
+		rootNode.attachChild(SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
 
 		addControls(this, rootNode, space);
 		buildTower();
@@ -155,8 +172,8 @@ public class Jenga extends SimpleApplication {
 		    	// control pointer
 				if (name.equals("pointerLeft")) {
 					Vector3f pos = pointer.control.getPhysicsLocation();
-					//pointer.setLocalTranslation(pos.x - POINTER_TRANSLATION * tpf, pos.y, pos.z);
-					//pointer.control.setPhysicsLocation(new Vector3f(pos.x - POINTER_TRANSLATION * tpf, pos.y, pos.z));
+					pointer.setLocalTranslation(pos.x - POINTER_TRANSLATION * tpf, pos.y, pos.z);
+					pointer.control.setPhysicsLocation(new Vector3f(pos.x - POINTER_TRANSLATION * tpf, pos.y, pos.z));
 					
 					Vector3f wtf = new Vector3f(pos.x - POINTER_TRANSLATION * tpf, pos.y, pos.z);
 					Vector3f newPos = pos.subtract(wtf);
@@ -266,7 +283,7 @@ public class Jenga extends SimpleApplication {
 
 	public static void main(String[] args) {
 		AppSettings settings = new AppSettings(true);
-		settings.setResolution(800, 600);
+		settings.setResolution(1000, 800);
 		settings.setBitsPerPixel(32);
 		settings.setFullscreen(false);
 
