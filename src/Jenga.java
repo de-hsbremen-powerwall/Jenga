@@ -70,6 +70,17 @@ public class Jenga extends SimpleApplication {
 		bulletControl.setRestitution(0.0f);
 		bulletControl.setSleepingThresholds(1f, 1f);
 		bulletControl.activate();
+		
+		Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		
+		Texture boxTex = assetManager.loadTexture("assets/Textures/brick.png");
+		
+		boxMat.setTexture("ColorMap", boxTex);
+		
+		boxGeometry.setMaterial(boxMat);
+		
+		
+		
 		rootNode.attachChild(boxGeometry);
 		getPhysicsSpace().add(bulletControl);
 
