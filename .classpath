@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="/Developer/sdk/jME3_2013-04-29/jMonkeyEngine3.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/FingerTrackerTest"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

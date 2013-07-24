@@ -17,7 +17,7 @@ public class Pointer extends Geometry implements PhysicsCollisionListener {
 	
   public Pointer(AssetManager assetManager, PhysicsSpace space) {
 		//super("Pointer", new Sphere(16, 16, 0.04f));
-		super("Pointer", new Box(0.06f, 0.06f, 0.06f));
+		super("Pointer", new Box(3f, 3f, 3f));
 		this.setMaterial(new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"));
 		control = new RigidBodyControl(10f);
 		this.addControl(control);
